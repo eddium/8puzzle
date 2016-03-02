@@ -2,19 +2,27 @@ import edu.princeton.cs.algs4.Stack;
 
 public class Board {
 
-    private int[][] tiles;
+    private int[] tiles;
     private int N;
 
     public Board(int[][] blocks)           // construct a board from an N-by-N array of tiles
     // (where tiles[i][j] = block in row i, column j)
     {
         N = blocks.length;
-        this.tiles = new int[N][N];
+        this.tiles = new int[N * N];
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                this.tiles[i][j] = blocks[i][j];
+                this.tiles[index(i, j)] = blocks[i][j];
             }
         }
+    }
+
+    public Board(int[] blocks)           // construct a board from an N-by-N array of tiles
+    // (where tiles[i][j] = block in row i, column j)
+    {
+        N = (int) Math.sqrt(blocks.length);
+        this.tiles = new int[blocks.length];
+        System.arraycopy(blocks, 0, this.tiles, 0, N * N);
     }
 
     public int dimension()                 // board dimension N
@@ -23,17 +31,15 @@ public class Board {
     }
 
     private int index(int i, int j) {
-        return i * N + j + 1;
+        return i * N + j;
     }
 
     public int hamming()                   // number of tiles out of place
     {
         int distance = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (tiles[i][j] != 0 && tiles[i][j] != index(i, j)) {
-                    distance++;
-                }
+        for (int i = 0; i < N * N; i++) {
+            if (tiles[i] != 0 && tiles[i] != i + 1) {
+                distance++;
             }
         }
         return distance;
@@ -42,21 +48,11 @@ public class Board {
     public int manhattan()                 // sum of Manhattan distances between tiles and goal
     {
         int distance = 0;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                int num = tiles[i][j];
-                if (num != 0 && num != index(i, j)) {
-                    int r, c;
-                    int remainder = num % N;
-                    if (remainder == 0) {
-                        r = num / N - 1;
-                        c = N - 1;
-                    } else {
-                        r = num / N;
-                        c = remainder - 1;
-                    }
-                    distance += Math.abs(r - i) + Math.abs(c - j);
-                }
+        for (int i = 0; i < N * N; i++) {
+            if(this.tiles[i] != 0) {
+                int x = Math.abs(i % N - (tiles[i] - 1) % N);
+                int y = Math.abs(i / N - (tiles[i] - 1) / N);
+                distance += x + y;
             }
         }
         return distance;
@@ -64,39 +60,37 @@ public class Board {
 
     public boolean isGoal()                // is this board the goal board?
     {
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (i == N - 1 && j == N - 1)
-                    return true;
-                if (tiles[i][j] != index(i, j)) {
-                    return false;
-                }
-            }
+        for (int i = 0; i < N * N - 1; i++) {
+            if (tiles[i] != i + 1)
+                return false;
         }
         return true;
     }
 
-    private void exch(int ix, int iy, int jx, int jy) {
-        int swap = tiles[ix][iy];
-        tiles[ix][iy] = tiles[jx][jy];
-        tiles[jx][jy] = swap;
+//    private void exch(int ix, int iy, int jx, int jy) {
+//        int swap = tiles[index(ix, iy)];
+//        tiles[index(ix, iy)] = tiles[index(jx, jy)];
+//        tiles[index(jx, jy)] = swap;
+//    }
+
+    private void exch(int i, int j) {
+        int swap = tiles[i];
+        tiles[i] = tiles[j];
+        tiles[j] = swap;
     }
 
     public Board twin()                    // a board that is obtained by exchanging any pair of tiles
     {
         Board twin = new Board(tiles);
-        int i = 0;
-        if (twin.tiles[0][0] != 0) {
-            if (twin.tiles[1][0] != 0) {
-                twin.exch(0, 0, 1, 0);
-            } else {
-                twin.exch(0, 0, 1, 1);
-            }
-        } else {
-            if (twin.tiles[1][0] != 0) {
-                twin.exch(0, 1, 1, 0);
-            } else {
-                twin.exch(0, 1, 1, 1);
+        for (int i = 0; i < N; i++) {
+            if (tiles[i] != 0) {
+                for (int j = i + 1; j < N; j++) {
+                    if (tiles[j] != 0) {
+                        twin.exch(i, j);
+                        break;
+                    }
+                }
+                break;
             }
         }
         return twin;
@@ -104,14 +98,18 @@ public class Board {
 
     public boolean equals(Object y)        // does this board equal y?
     {
-        if (y == this) return true;
-        if (y == null) return false;
-        if (y.getClass() != this.getClass()) return false;
+        if (y == this)
+            return true;
+        if (y == null)
+            return false;
+        if (y.getClass() != this.getClass())
+            return false;
         Board that = (Board) y;
-        if (this.N != that.N) return false;
+        if (this.dimension() != that.dimension())
+            return false;
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (tiles[i][j] != that.tiles[i][j]) {
+                if (tiles[index(i, j)] != that.tiles[index(i, j)]) {
                     return false;
                 }
             }
@@ -124,29 +122,29 @@ public class Board {
         Stack<Board> neighbors = new Stack<>();
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                if (tiles[i][j] == 0) {
+                if (tiles[index(i, j)] == 0) {
                     Board neighbor;
                     if (i > 0) {
                         neighbor = new Board(tiles);
-                        neighbor.exch(i, j, i - 1, j);
+                        neighbor.exch(index(i, j), index(i - 1, j));
                         neighbors.push(neighbor);
                     }
 
                     if (j > 0) {
                         neighbor = new Board(tiles);
-                        neighbor.exch(i, j, i, j - 1);
+                        neighbor.exch(index(i, j), index(i, j - 1));
                         neighbors.push(neighbor);
                     }
 
                     if (i < N - 1) {
                         neighbor = new Board(tiles);
-                        neighbor.exch(i, j, i + 1, j);
+                        neighbor.exch(index(i, j), index(i + 1, j));
                         neighbors.push(neighbor);
                     }
 
                     if (j < N - 1) {
                         neighbor = new Board(tiles);
-                        neighbor.exch(i, j, i, j + 1);
+                        neighbor.exch(index(i, j), index(i, j + 1));
                         neighbors.push(neighbor);
                     }
                     break;
@@ -161,7 +159,7 @@ public class Board {
         s.append(N + "\n");
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                s.append(String.format("%2d ", tiles[i][j]));
+                s.append(String.format("%2d ", tiles[index(i, j)]));
             }
             s.append("\n");
         }
