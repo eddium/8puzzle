@@ -210,7 +210,7 @@ public class Board {
 
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append(N + "\n");
+        s.append(N).append("\n");
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 s.append(String.format("%2d ", tiles[index(i, j)]));
