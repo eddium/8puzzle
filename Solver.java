@@ -5,6 +5,8 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
+    private static int cnt;
+
     private Stack<Board> solution;
     private boolean isSolved = false;
     private int moves;
@@ -57,6 +59,7 @@ public class Solver {
                 SearchNode neighborNode = new SearchNode(neighbor, currentNode, currentNode.moves + 1);
                 if (!neighborNode.board.equals(currentNode.parent.board)) {
                     pq.insert(neighborNode);
+                    cnt++;
                 }
                 currentNode.children[i++] = neighborNode;
             }
@@ -134,6 +137,7 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);
         }
+        System.out.println(cnt);
     }
 }
 

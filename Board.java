@@ -6,7 +6,6 @@ public class Board {
     private int N;
 
     public Board(int[][] blocks)           // construct a board from an N-by-N array of tiles
-    // (where tiles[i][j] = block in row i, column j)
     {
         N = blocks.length;
         this.tiles = new int[N * N];
@@ -40,11 +39,11 @@ public class Board {
                 distance++;
             }
         }
+//        distance += 2 * conflictDetection(tiles);
         return distance;
     }
 
-    public int manhattan()                 // sum of Manhattan distances between tiles and goal
-    {
+    public int manhattan() {     // sum of Manhattan distances between tiles and goal
         int distance = 0;
         for (int i = 0; i < N * N; i++) {
             if (this.tiles[i] != 0) {
@@ -53,7 +52,72 @@ public class Board {
                 distance += x + y;
             }
         }
+//        distance += 2 * conflictDetection(tiles);
         return distance;
+    }
+
+
+    //  conflictDetection() returns the number of linear conflicts
+    //  count(), sort(), merge() are the helper functions for conflictDetection()
+    private int conflictDetection(int[] a) {
+        int cnt = 0;
+        int[] conflict;
+        for (int i = 0, k = 0; i < N; i++, k = 0) {
+            conflict = new int[N];
+            for (int j = i; j < N * N; j += N) {
+                if (j % N == (a[j] - 1) % N) {
+                    conflict[k++] = tiles[j];
+                }
+            }
+            cnt += count(conflict, 0, k - 1);
+        }
+        for (int i = 0, k = 0; i < N * N; i += N, k = 0) {
+            conflict = new int[N];
+            for (int j = i; j < i + N; j++) {
+                if (j / N == (a[j] - 1) / N) {
+                    conflict[k++] = a[j];
+                }
+            }
+            cnt += count(conflict, 0, k - 1);
+        }
+        return cnt;
+    }
+
+    private int count(int[] a, int lo, int hi) {
+        int[] aux = new int[hi - lo + 1];
+        return sort(a, aux, lo, hi);
+    }
+
+    private int sort(int[] a, int[] aux, int lo, int hi) {
+        if (lo >= hi)
+            return 0;
+        int cnt = 0;
+        int mid = (lo + hi) / 2;
+        cnt += sort(a, aux, lo, mid);
+        cnt += sort(a, aux, mid + 1, hi);
+        cnt += merge(a, aux, lo, mid, hi);
+        return cnt;
+    }
+
+    private int merge(int[] a, int[] aux, int lo, int mid, int hi) {
+        int cnt = 0;
+        System.arraycopy(a, lo, aux, lo, hi + 1 - lo);
+
+        int i = lo;
+        int j = mid + 1;
+        for (int k = lo; k <= hi; k++) {
+            if (i > mid) {
+                a[k] = aux[j++];
+            } else if (j > hi) {
+                a[k] = aux[i++];
+            } else if (aux[i] > aux[j]) {
+                a[k] = aux[j++];
+                cnt += mid - i + 1;
+            } else {
+                a[k] = aux[i++];
+            }
+        }
+        return cnt;
     }
 
     public boolean isGoal()                // is this board the goal board?
@@ -64,7 +128,6 @@ public class Board {
         }
         return true;
     }
-
 
     private void exch(int i, int j) {
         int swap = tiles[i];
@@ -100,11 +163,9 @@ public class Board {
         Board that = (Board) y;
         if (this.dimension() != that.dimension())
             return false;
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (tiles[index(i, j)] != that.tiles[index(i, j)]) {
-                    return false;
-                }
+        for (int i = 0; i < N * N; i++) {
+            if (tiles[i] != that.tiles[i]) {
+                return false;
             }
         }
         return true;
@@ -160,12 +221,8 @@ public class Board {
     }
 
     public static void main(String[] args) {
-//        int[][] blocks = {{5, 1, 8}, {2, 7, 3}, {4, 0, 6}};
-        int[][] blocks = {{1, 0}, {2, 3}};
+        int[][] blocks = {{5, 1, 8}, {2, 7, 3}, {4, 0, 6}};
         Board a = new Board(blocks);
-        System.out.println(a);
-        System.out.println(a.twin());
+        System.out.println(a.manhattan());
     }
-
-
 }
