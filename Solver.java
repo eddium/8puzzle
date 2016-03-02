@@ -5,9 +5,9 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
-    private int moves = 0;
-
     private boolean isSolved = false;
+    private Stack<Board> solution = new Stack<>();
+    private int moves;
 
     private class GameTree {
 
@@ -15,6 +15,7 @@ public class Solver {
 
             private Board board;
             private int priority;
+            private int moves;
             private SearchNode[] children = new SearchNode[4];
             private SearchNode parent;
 
@@ -22,6 +23,7 @@ public class Solver {
                 if (board == null || parent == null) return;
                 this.board = board;
                 this.parent = parent;
+                this.moves = moves;
                 this.priority = board.hamming() + moves;
             }
 
@@ -53,7 +55,7 @@ public class Solver {
             return solution;
         }
 
-        private boolean step(int moves) {
+        private boolean step() {
             currentNode = pq.delMin();
             if (currentNode.board.isGoal()) {
                 return true;
@@ -61,9 +63,9 @@ public class Solver {
 
             int i = 0;
             for (Board neighbor : currentNode.board.neighbors()) {
-                SearchNode neighborNode = new SearchNode(neighbor, currentNode, moves);
+                SearchNode neighborNode = new SearchNode(neighbor, currentNode, currentNode.moves + 1);
                 if (!neighborNode.board.equals(currentNode.parent.board)) {
-                    pq.insert(new SearchNode(neighbor, currentNode, moves));
+                    pq.insert(neighborNode);
                 }
                 currentNode.children[i] = neighborNode;
                 i++;
@@ -73,24 +75,22 @@ public class Solver {
         }
     }
 
-    private GameTree initTree;
-    private GameTree twinTree;
-
     public Solver(Board initial)           // find a solution to the initial board (using the A* algorithm)
     {
         if (initial == null)
             throw new java.lang.NullPointerException();
 
-        initTree = new GameTree(initial);
-        twinTree = new GameTree(initial.twin());
+        GameTree initTree = new GameTree(initial);
+        GameTree twinTree = new GameTree(initial.twin());
 
         while (true) {
-            moves++;
-            if (initTree.step(moves)) {
+            if (initTree.step()) {
+                moves = initTree.currentNode.moves;
+                solution = initTree.getSolution();
                 isSolved = true;
                 break;
             }
-            if (twinTree.step(moves)) {
+            if (twinTree.step()) {
                 break;
             }
         }
@@ -103,12 +103,12 @@ public class Solver {
 
     public int moves()                     // min number of moves to solution initial board; -1 if unsolvable
     {
-        return moves - 1;
+        return moves;
     }
 
     public Iterable<Board> solution()      // sequence of boards in a shortest solution; null if unsolvable
     {
-        return initTree.getSolution();
+        return solution;
     }
 
     public static void main(String[] args) // solution a slider puzzle (given below)
