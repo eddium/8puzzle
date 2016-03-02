@@ -2,14 +2,14 @@ import edu.princeton.cs.algs4.Stack;
 
 public class Board {
 
-    private int[][] tiles;
+    private int[] tiles;
     private int N;
 
     public Board(int[][] blocks)           // construct a board from an N-by-N array of tiles
     // (where tiles[i][j] = block in row i, column j)
     {
         N = blocks.length;
-        this.tiles = new int[N][N];
+        this.tiles = new int[N*N];
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
                 this.tiles[i][j] = blocks[i][j];
