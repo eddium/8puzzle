@@ -5,8 +5,8 @@ import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
+    private Stack<Board> solution;
     private boolean isSolved = false;
-    private Stack<Board> solution = new Stack<>();
     private int moves;
 
     private class GameTree {
@@ -24,7 +24,7 @@ public class Solver {
                 this.board = board;
                 this.parent = parent;
                 this.moves = moves;
-                this.priority = board.hamming() + moves;
+                this.priority = board.manhattan() + moves;
             }
 
             @Override
@@ -46,15 +46,6 @@ public class Solver {
             pq.insert(root);
         }
 
-        private Stack<Board> getSolution() {
-            Stack<Board> solution = new Stack<>();
-            while (currentNode.board != null) {
-                solution.push(currentNode.board);
-                currentNode = currentNode.parent;
-            }
-            return solution;
-        }
-
         private boolean step() {
             currentNode = pq.delMin();
             if (currentNode.board.isGoal()) {
@@ -67,12 +58,21 @@ public class Solver {
                 if (!neighborNode.board.equals(currentNode.parent.board)) {
                     pq.insert(neighborNode);
                 }
-                currentNode.children[i] = neighborNode;
-                i++;
+                currentNode.children[i++] = neighborNode;
             }
 
             return false;
         }
+
+        private Stack<Board> getSolution() {
+            Stack<Board> solutionStack = new Stack<>();
+            while (currentNode.board != null) {
+                solutionStack.push(currentNode.board);
+                currentNode = currentNode.parent;
+            }
+            return solutionStack;
+        }
+
     }
 
     public Solver(Board initial)           // find a solution to the initial board (using the A* algorithm)
@@ -91,6 +91,7 @@ public class Solver {
                 break;
             }
             if (twinTree.step()) {
+                moves = -1;
                 break;
             }
         }

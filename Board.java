@@ -17,9 +17,7 @@ public class Board {
         }
     }
 
-    public Board(int[] blocks)           // construct a board from an N-by-N array of tiles
-    // (where tiles[i][j] = block in row i, column j)
-    {
+    private Board(int[] blocks) {
         N = (int) Math.sqrt(blocks.length);
         this.tiles = new int[blocks.length];
         System.arraycopy(blocks, 0, this.tiles, 0, N * N);
@@ -49,7 +47,7 @@ public class Board {
     {
         int distance = 0;
         for (int i = 0; i < N * N; i++) {
-            if(this.tiles[i] != 0) {
+            if (this.tiles[i] != 0) {
                 int x = Math.abs(i % N - (tiles[i] - 1) % N);
                 int y = Math.abs(i / N - (tiles[i] - 1) / N);
                 distance += x + y;
@@ -67,11 +65,6 @@ public class Board {
         return true;
     }
 
-//    private void exch(int ix, int iy, int jx, int jy) {
-//        int swap = tiles[index(ix, iy)];
-//        tiles[index(ix, iy)] = tiles[index(jx, jy)];
-//        tiles[index(jx, jy)] = swap;
-//    }
 
     private void exch(int i, int j) {
         int swap = tiles[i];
@@ -82,9 +75,9 @@ public class Board {
     public Board twin()                    // a board that is obtained by exchanging any pair of tiles
     {
         Board twin = new Board(tiles);
-        for (int i = 0; i < N; i++) {
+        for (int i = 0; i < N * N; i++) {
             if (tiles[i] != 0) {
-                for (int j = i + 1; j < N; j++) {
+                for (int j = i + 1; j < N * N; j++) {
                     if (tiles[j] != 0) {
                         twin.exch(i, j);
                         break;
@@ -167,16 +160,11 @@ public class Board {
     }
 
     public static void main(String[] args) {
-        int[][] blocks = {{5, 1, 8}, {2, 7, 3}, {4, 0, 6}};
-//        int[][] blocks1 = {{1,3,5},{2,1,7},{4,6,8}};
+//        int[][] blocks = {{5, 1, 8}, {2, 7, 3}, {4, 0, 6}};
+        int[][] blocks = {{1, 0}, {2, 3}};
         Board a = new Board(blocks);
-//        Board b = new Board(blocks1);
         System.out.println(a);
-//        for(Board k : a.neighbors()) {
-//            System.out.println(k);
-//        }
-        System.out.println(a.manhattan());
-//        System.out.println(a.equals(a));
+        System.out.println(a.twin());
     }
 
 
