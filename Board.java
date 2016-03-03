@@ -2,23 +2,23 @@ import edu.princeton.cs.algs4.Stack;
 
 public class Board {
 
-    private int[] tiles;
+    private char[] tiles;
     private int N;
 
     public Board(int[][] blocks)           // construct a board from an N-by-N array of tiles
     {
         N = blocks.length;
-        this.tiles = new int[N * N];
+        this.tiles = new char[N * N];
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                this.tiles[index(i, j)] = blocks[i][j];
+                this.tiles[index(i, j)] = (char) blocks[i][j];
             }
         }
     }
 
-    private Board(int[] blocks) {
+    private Board(char[] blocks) {
         N = (int) Math.sqrt(blocks.length);
-        this.tiles = new int[blocks.length];
+        this.tiles = new char[blocks.length];
         System.arraycopy(blocks, 0, this.tiles, 0, N * N);
     }
 
@@ -52,17 +52,17 @@ public class Board {
                 distance += x + y;
             }
         }
-//        distance += 2 * conflictDetection(tiles);
+        distance += 2 * conflictDetection(tiles);
         return distance;
     }
 
 
     //  conflictDetection() returns the number of linear conflicts
     //  count(), sort(), merge() are the helper functions for conflictDetection()
-    private int conflictDetection(int[] a) {
+    private int conflictDetection(char[] a) {
         int cnt = 0;
         int[] conflict;
-        for (int i = 0, k = 0; i < N; i++, k = 0) {
+        for (int i = 0, k = 0; i < N; i++) {
             conflict = new int[N];
             for (int j = i; j < N * N; j += N) {
                 if (j % N == (a[j] - 1) % N) {
@@ -70,8 +70,9 @@ public class Board {
                 }
             }
             cnt += count(conflict, 0, k - 1);
+            k = 0;
         }
-        for (int i = 0, k = 0; i < N * N; i += N, k = 0) {
+        for (int i = 0, k = 0; i < N * N; i += N) {
             conflict = new int[N];
             for (int j = i; j < i + N; j++) {
                 if (j / N == (a[j] - 1) / N) {
@@ -79,6 +80,7 @@ public class Board {
                 }
             }
             cnt += count(conflict, 0, k - 1);
+            k = 0;
         }
         return cnt;
     }
@@ -130,7 +132,7 @@ public class Board {
     }
 
     private void exch(int i, int j) {
-        int swap = tiles[i];
+        char swap = tiles[i];
         tiles[i] = tiles[j];
         tiles[j] = swap;
     }
@@ -170,6 +172,7 @@ public class Board {
         }
         return true;
     }
+
 
     public Iterable<Board> neighbors()     // all neighboring boards
     {
@@ -213,7 +216,7 @@ public class Board {
         s.append(N).append("\n");
         for (int i = 0; i < N; i++) {
             for (int j = 0; j < N; j++) {
-                s.append(String.format("%2d ", tiles[index(i, j)]));
+                s.append(String.format("%2d ", (int) tiles[index(i, j)]));
             }
             s.append("\n");
         }
@@ -221,7 +224,7 @@ public class Board {
     }
 
     public static void main(String[] args) {
-        int[][] blocks = {{5, 1, 8}, {2, 7, 3}, {4, 0, 6}};
+        int[][] blocks = {{1, 0}, {2, 3}};
         Board a = new Board(blocks);
         System.out.println(a.manhattan());
     }
