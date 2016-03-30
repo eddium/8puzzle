@@ -52,7 +52,7 @@ public class Board {
                 distance += x + y;
             }
         }
-        distance += 2 * conflictDetection(tiles);
+//        distance += 2 * conflictDetection(tiles);
         return distance;
     }
 
@@ -173,41 +173,30 @@ public class Board {
         return true;
     }
 
+    private Iterable<Board> getNeighbors(Stack<Board> neighbors, int i, int j) {
+        for (int m = -1; m < 2; m++) {
+            for (int n = -1; n < 2; n++) {
+                if ((m + n) == -1 || (m + n) == 1) {
+                    int r = i + m;
+                    int c = j + n;
+                    if (r > -1 && r < N && c > -1 && c < N) {
+                        Board neighbor = new Board(tiles);
+                        neighbor.exch(index(i, j), index(r, c));
+                        neighbors.push(neighbor);
+                    }
+                }
+            }
+        }
+        return neighbors;
+    }
 
     public Iterable<Board> neighbors()     // all neighboring boards
     {
         Stack<Board> neighbors = new Stack<>();
-        for (int i = 0; i < N; i++) {
-            for (int j = 0; j < N; j++) {
-                if (tiles[index(i, j)] == 0) {
-                    Board neighbor;
-                    if (i > 0) {
-                        neighbor = new Board(tiles);
-                        neighbor.exch(index(i, j), index(i - 1, j));
-                        neighbors.push(neighbor);
-                    }
-
-                    if (j > 0) {
-                        neighbor = new Board(tiles);
-                        neighbor.exch(index(i, j), index(i, j - 1));
-                        neighbors.push(neighbor);
-                    }
-
-                    if (i < N - 1) {
-                        neighbor = new Board(tiles);
-                        neighbor.exch(index(i, j), index(i + 1, j));
-                        neighbors.push(neighbor);
-                    }
-
-                    if (j < N - 1) {
-                        neighbor = new Board(tiles);
-                        neighbor.exch(index(i, j), index(i, j + 1));
-                        neighbors.push(neighbor);
-                    }
-                    break;
-                }
-            }
-        }
+        for (int i = 0; i < N; i++)
+            for (int j = 0; j < N; j++)
+                if (tiles[index(i, j)] == 0)
+                    return getNeighbors(neighbors, i, j);
         return neighbors;
     }
 
