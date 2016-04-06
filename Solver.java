@@ -1,79 +1,12 @@
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Solver {
 
     private Stack<Board> solution;
-    private boolean isSolved = false;
+    private boolean isSolved;
     private int moves;
-
-    private class GameTree {
-
-        private class SearchNode implements Comparable<SearchNode> {
-
-            private Board board;
-            private int priority;
-            private int moves;
-            private SearchNode[] children = new SearchNode[4];
-            private SearchNode parent;
-
-            SearchNode(Board board, SearchNode parent, int moves) {
-                if (board == null || parent == null) return;
-                this.board = board;
-                this.parent = parent;
-                this.moves = moves;
-                this.priority = board.manhattan() + moves;
-            }
-
-            @Override
-            public int compareTo(SearchNode that) {
-                if (this.priority > that.priority) return 1;
-                else if (this.priority < that.priority) return -1;
-                else return 0;
-            }
-        }
-
-        private SearchNode root;
-        private SearchNode currentNode;
-        private MinPQ<SearchNode> pq;
-
-        private GameTree(Board board) {
-            SearchNode sentinel = new SearchNode(null, null, 0);
-            root = new SearchNode(board, sentinel, 0);
-            pq = new MinPQ<>();
-            pq.insert(root);
-        }
-
-        private boolean step() {
-            currentNode = pq.delMin();
-            if (currentNode.board.isGoal()) {
-                return true;
-            }
-
-            int i = 0;
-            for (Board neighbor : currentNode.board.neighbors()) {
-                SearchNode neighborNode = new SearchNode(neighbor, currentNode, currentNode.moves + 1);
-                if (!neighborNode.board.equals(currentNode.parent.board)) {
-                    pq.insert(neighborNode);
-                }
-                currentNode.children[i++] = neighborNode;
-            }
-
-            return false;
-        }
-
-        private Stack<Board> getSolution() {
-            Stack<Board> solutionStack = new Stack<>();
-            while (currentNode.board != null) {
-                solutionStack.push(currentNode.board);
-                currentNode = currentNode.parent;
-            }
-            return solutionStack;
-        }
-
-    }
 
     public Solver(Board initial)           // find a solution to the initial board (using the A* algorithm)
     {
@@ -85,7 +18,7 @@ public class Solver {
 
         while (true) {
             if (initTree.step()) {
-                moves = initTree.currentNode.moves;
+                moves = initTree.currentMoves();
                 solution = initTree.getSolution();
                 isSolved = true;
                 break;

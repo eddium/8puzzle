@@ -58,7 +58,7 @@ public class Board {
 
 
     //  conflictDetection() returns the number of linear conflicts
-    //  count(), sort(), merge() are the helper functions for conflictDetection()
+    //  count(), sort(), merge() are helper functions for conflictDetection()
     private int conflictDetection(char[] a) {
         int cnt = 0;
         int[] conflict;
